@@ -1,0 +1,38 @@
+{
+  "name": "ec-key",
+  "description": "Wrapper around an Elliptic Curve private or public keys",
+  "version": "0.0.0",
+  "main": "src/ec-key.js",
+
+  "author": "Pier Fumagalli <pier@relocately.com>",
+  "homepage": "https://github.com/relocately/ec-key",
+  "bugs": "https://github.com/relocately/ec-key/issues",
+  "license": "MIT",
+
+  "contributors": [
+    "Pier Fumagalli <pier@relocately.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/relocately/ec-key"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "keywords": [
+    "ec", "elliptic", "curve", "crypto", "private", "public", "key", "pem",
+    "spki", "pkcs8", "pem", "rfc5208", "rfc5280", "rfc5915", "openssl"
+  ],
+
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^4.3.1"
+  },
+  "dependencies": {
+    "asn1.js": "^1.0.4"
+  },
+  "engines": {
+    "node": "~6.0."
+  }
+}
