@@ -45,7 +45,21 @@ const curves = {
  * ASN.1                                                                      *
  * ========================================================================== */
 
-const ASN1ECRfc5915Key = asn.define('Rfc5915Key', function() {
+const ASN1ECRfc5915KeyDecoder = asn.define('Rfc5915Key', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('privateKey').octstr(),
+    this.key('parameters').optional().explicit(0).objid({
+      '1 2 840 10045 3 1 7' : 'prime256v1',
+      '1 3 132 0 10'        : 'prime256v1',
+      '1 3 132 0 34'        : 'secp384r1',
+      '1 3 132 0 35'        : 'secp521r1',
+    }),
+    this.key('publicKey').optional().explicit(1).bitstr()
+  );
+});
+
+const ASN1ECRfc5915KeyEncoder = asn.define('Rfc5915Key', function() {
   this.seq().obj(
     this.key('version').int(),
     this.key('privateKey').octstr(),
@@ -58,7 +72,27 @@ const ASN1ECRfc5915Key = asn.define('Rfc5915Key', function() {
   );
 });
 
-const ASN1ECPkcs8Key = asn.define('Pkcs8Key', function() {
+/* ========================================================================== */
+
+const ASN1ECPkcs8KeyDecoder = asn.define('Pkcs8Key', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('algorithmIdentifier').seq().obj(
+      this.key('privateKeyType').objid({
+        '1 2 840 10045 2 1': 'EC'
+      }),
+      this.key('parameters').objid({
+        '1 2 840 10045 3 1 7' : 'prime256v1',
+        '1 3 132 0 10'        : 'prime256v1',
+        '1 3 132 0 34'        : 'secp384r1',
+        '1 3 132 0 35'        : 'secp521r1',
+      })
+    ),
+    this.key('privateKey').octstr()
+  );
+});
+
+const ASN1ECPkcs8KeyEncoder = asn.define('Pkcs8Key', function() {
   this.seq().obj(
     this.key('version').int(),
     this.key('algorithmIdentifier').seq().obj(
@@ -75,8 +109,26 @@ const ASN1ECPkcs8Key = asn.define('Pkcs8Key', function() {
   );
 });
 
+/* ========================================================================== */
 
-const ASN1ECSpkiKey = asn.define('SpkiKey', function() {
+const ASN1ECSpkiKeyDecoder = asn.define('SpkiKey', function() {
+  this.seq().obj(
+    this.key('algorithmIdentifier').seq().obj(
+      this.key('publicKeyType').objid({
+        '1 2 840 10045 2 1': 'EC'
+      }),
+      this.key('parameters').objid({
+        '1 2 840 10045 3 1 7' : 'prime256v1',
+        '1 3 132 0 10'        : 'prime256v1',
+        '1 3 132 0 34'        : 'secp384r1',
+        '1 3 132 0 35'        : 'secp521r1',
+      })
+    ),
+    this.key('publicKey').bitstr()
+  );
+});
+
+const ASN1ECSpkiKeyEncoder = asn.define('SpkiKey', function() {
   this.seq().obj(
     this.key('algorithmIdentifier').seq().obj(
       this.key('publicKeyType').objid({
@@ -113,8 +165,8 @@ function parsePublicKeyBuffer(curve, buffer) {
 
 /* Parse PKCS8 from RFC 5208 */
 function parsePkcs8(buffer) {
-  var key = ASN1ECPkcs8Key.decode(buffer, 'der');
-  var privateKeyWrapper = ASN1ECRfc5915Key.decode(key.privateKey, 'der');
+  var key = ASN1ECPkcs8KeyDecoder.decode(buffer, 'der');
+  var privateKeyWrapper = ASN1ECRfc5915KeyDecoder.decode(key.privateKey, 'der');
   var curve = key.algorithmIdentifier.parameters;
   var bytes = lengths[curve];
 
@@ -130,7 +182,7 @@ function parsePkcs8(buffer) {
 
 /* Parse EC from RFC 5915 */
 function parseRfc5915(buffer) {
-  var key = ASN1ECRfc5915Key.decode(buffer, 'der');
+  var key = ASN1ECRfc5915KeyDecoder.decode(buffer, 'der');
   var bytes = lengths[key.parameters];
 
   var privateKey = key.privateKey;
@@ -145,7 +197,7 @@ function parseRfc5915(buffer) {
 
 /* Parse SPKI from RFC 5280 */
 function parseSpki(buffer) {
-  var key = ASN1ECSpkiKey.decode(buffer, 'der');
+  var key = ASN1ECSpkiKeyDecoder.decode(buffer, 'der');
   return parsePublicKeyBuffer(key.algorithmIdentifier.parameters, key.publicKey.data);
 }
 
@@ -457,14 +509,14 @@ ECKey.prototype.toBuffer = function toBuffer(format) {
     if ((format == "pkcs8") || (format == "rfc5208")) {
 
       // Encode in PKCS8
-      return ASN1ECPkcs8Key.encode({
+      return ASN1ECPkcs8KeyEncoder.encode({
         version: 0,
         algorithmIdentifier: {
           privateKeyType: 'EC',
           parameters: this.curve,
         },
         // Private key is RFC5915 minus curve
-        privateKey: ASN1ECRfc5915Key.encode({
+        privateKey: ASN1ECRfc5915KeyEncoder.encode({
           version: 1,
           privateKey: d,
           publicKey: { data: this.publicCodePoint }
@@ -474,7 +526,7 @@ ECKey.prototype.toBuffer = function toBuffer(format) {
     } else if (format == "rfc5915") {
 
       // Simply encode in ASN.1
-      return ASN1ECRfc5915Key.encode({
+      return ASN1ECRfc5915KeyEncoder.encode({
         version: 1,
         privateKey: d,
         parameters: this.curve,
@@ -488,7 +540,7 @@ ECKey.prototype.toBuffer = function toBuffer(format) {
   } else {
 
     if ((format == "spki") || (format == "rfc5280")) {
-      return ASN1ECSpkiKey.encode({
+      return ASN1ECSpkiKeyEncoder.encode({
         algorithmIdentifier: {
           publicKeyType: 'EC',
           parameters: this.curve
