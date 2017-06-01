@@ -7,7 +7,7 @@ const fs = require('fs');
 describe('EC Key', function() {
 
   var re = /-+BEGIN .* KEY-+([\s\S]+)-+END .* KEY-+/m;
-  var names = [ 'prime256v1', 'secp384r1', 'secp521r1' ];
+  var names = [ 'prime256v1', 'secp384r1', 'secp521r1', 'secp256k1' ];
   var curves = {};
 
   before(function() {
@@ -19,8 +19,8 @@ describe('EC Key', function() {
         pub: fs.readFileSync('./test/support/' + name + '.pub.pem', 'utf8'),
         // JWK FILES
         privJwk: JSON.parse(fs.readFileSync('./test/support/' + name + '.priv.json', 'utf8')),
-        pubJwk: JSON.parse(fs.readFileSync('./test/support/' + name + '.pub.json', 'utf8')),
-      }
+        pubJwk: JSON.parse(fs.readFileSync('./test/support/' + name + '.pub.json', 'utf8'))
+      };
     })(names[i]);
   });
 
@@ -52,8 +52,9 @@ describe('EC Key', function() {
         expect(key.toJSON(), "jwk").to.eql(curve.privJwk);
 
         // Buffers: pkcs8, openssl and spki (public)
+        var pkcs8b64 = curve.pkcs8.match(re)[1].replace(/[\s-]/g, '')
         expect(key.toBuffer('pkcs8').toString('base64'))
-          .to.equal(curve.pkcs8.match(re)[1].replace(/[\s-]/g, ''));
+          .to.equal(pkcs8b64);
         expect(key.toBuffer('rfc5915').toString('base64'))
           .to.equal(curve.priv.match(re)[1].replace(/[\s-]/g, ''));
 
