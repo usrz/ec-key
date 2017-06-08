@@ -15,6 +15,7 @@ const util = require('util');
  * |   SECG    | ANSI X9.62 |    NIST    |  OpenSSL   |      ASN.1 OID      | *
  * +-----------+------------+------------+------------+---------------------+ *
  * | secp256r1 | prime256v1 | NIST P-256 | prime256v1 | 1.2.840.10045.3.1.7 | *
+ * | secp256k1 |            |            | secp256k1  | 1.3.132.0.10        | *
  * | secp384r1 |            | NIST P-384 | secp384r1  | 1.3.132.0.34        | *
  * | secp521r1 |            | NIST P-521 | secp521r1  | 1.3.132.0.35        | *
  * +-----------+------------+------------+------------+---------------------+ *
@@ -23,23 +24,26 @@ const util = require('util');
 /* Byte lengths for validation */
 const lengths = {
   prime256v1 : Math.ceil(256 / 8),
+   secp256k1 : Math.ceil(256 / 8),
    secp384r1 : Math.ceil(384 / 8),
-   secp521r1 : Math.ceil(521 / 8),
-}
+   secp521r1 : Math.ceil(521 / 8)
+};
 
 /* JWK curve names */
 const jwkCurves = {
   prime256v1 : 'P-256',
+   secp256k1 : 'P-256K', //This curve isn't given a formal name in the standard, http://hdknr.github.io/docs/identity/jwa.html
    secp384r1 : 'P-384',
-   secp521r1 : 'P-521',
-}
+   secp521r1 : 'P-521'
+};
 
 /* OpenSSL curve names */
 const curves = {
  'P-256' : 'prime256v1',
+ 'P-256K' : 'secp256k1', //See above.
  'P-384' : 'secp384r1',
- 'P-521' : 'secp521r1',
-}
+ 'P-521' : 'secp521r1'
+};
 
 /* ========================================================================== *
  * ASN.1                                                                      *
@@ -51,9 +55,9 @@ const ASN1ECRfc5915KeyDecoder = asn.define('Rfc5915Key', function() {
     this.key('privateKey').octstr(),
     this.key('parameters').optional().explicit(0).objid({
       '1 2 840 10045 3 1 7' : 'prime256v1',
-      '1 3 132 0 10'        : 'prime256v1',
+      '1 3 132 0 10'        : 'secp256k1',
       '1 3 132 0 34'        : 'secp384r1',
-      '1 3 132 0 35'        : 'secp521r1',
+      '1 3 132 0 35'        : 'secp521r1'
     }),
     this.key('publicKey').optional().explicit(1).bitstr()
   );
@@ -65,8 +69,9 @@ const ASN1ECRfc5915KeyEncoder = asn.define('Rfc5915Key', function() {
     this.key('privateKey').octstr(),
     this.key('parameters').optional().explicit(0).objid({
       '1 2 840 10045 3 1 7' : 'prime256v1',
+      '1 3 132 0 10'        : 'secp256k1',
       '1 3 132 0 34'        : 'secp384r1',
-      '1 3 132 0 35'        : 'secp521r1',
+      '1 3 132 0 35'        : 'secp521r1'
     }),
     this.key('publicKey').optional().explicit(1).bitstr()
   );
@@ -83,9 +88,9 @@ const ASN1ECPkcs8KeyDecoder = asn.define('Pkcs8Key', function() {
       }),
       this.key('parameters').objid({
         '1 2 840 10045 3 1 7' : 'prime256v1',
-        '1 3 132 0 10'        : 'prime256v1',
+        '1 3 132 0 10'        : 'secp256k1',
         '1 3 132 0 34'        : 'secp384r1',
-        '1 3 132 0 35'        : 'secp521r1',
+        '1 3 132 0 35'        : 'secp521r1'
       })
     ),
     this.key('privateKey').octstr()
@@ -101,8 +106,9 @@ const ASN1ECPkcs8KeyEncoder = asn.define('Pkcs8Key', function() {
       }),
       this.key('parameters').objid({
         '1 2 840 10045 3 1 7' : 'prime256v1',
+        '1 3 132 0 10'        : 'secp256k1',
         '1 3 132 0 34'        : 'secp384r1',
-        '1 3 132 0 35'        : 'secp521r1',
+        '1 3 132 0 35'        : 'secp521r1'
       })
     ),
     this.key('privateKey').octstr()
@@ -119,9 +125,9 @@ const ASN1ECSpkiKeyDecoder = asn.define('SpkiKey', function() {
       }),
       this.key('parameters').objid({
         '1 2 840 10045 3 1 7' : 'prime256v1',
-        '1 3 132 0 10'        : 'prime256v1',
+        '1 3 132 0 10'        : 'secp256k1',
         '1 3 132 0 34'        : 'secp384r1',
-        '1 3 132 0 35'        : 'secp521r1',
+        '1 3 132 0 35'        : 'secp521r1'
       })
     ),
     this.key('publicKey').bitstr()
@@ -136,8 +142,9 @@ const ASN1ECSpkiKeyEncoder = asn.define('SpkiKey', function() {
       }),
       this.key('parameters').objid({
         '1 2 840 10045 3 1 7' : 'prime256v1',
+        '1 3 132 0 10'        : 'secp256k1',
         '1 3 132 0 34'        : 'secp384r1',
-        '1 3 132 0 35'        : 'secp521r1',
+        '1 3 132 0 35'        : 'secp521r1'
       })
     ),
     this.key('publicKey').bitstr()
