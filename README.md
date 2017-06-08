@@ -28,11 +28,12 @@ Curves
 
 This wrapper supports onl the three main curves listed below:
 
-| OpenSSL Curve Name | RFC-7518 (6.2.1.1) | ASN.1 OID           |
-| ------------------ | ------------------ | ------------------- |
-| `prime256v1`       | `P-256`            | 1.2.840.10045.3.1.7 |
-| `secp384r1`        | `P-384`            | 1.3.132.0.34        |
-| `secp521r1`        | `P-521`            | 1.3.132.0.35        |
+| OpenSSL Curve Name | RFC-7518 (6.2.1.1)      | ASN.1 OID           |
+| ------------------ | ----------------------- | ------------------- |
+| `prime256v1`       | `P-256`                 | 1.2.840.10045.3.1.7 |
+| `secp384k1`        | `P-256K` _non standard_ | 1.3.132.0.10        |
+| `secp384r1`        | `P-384`                 | 1.3.132.0.34        |
+| `secp521r1`        | `P-521`                 | 1.3.132.0.35        |
 
 Both the OpenSSL names and RFC-7518 (JWA/JWK) names can be used as parameters
 to the methods in the `ECKey` class.
@@ -41,6 +42,14 @@ Please be aware that _NodeJS_ (and _OpenSSL_) support a large number of curves
 (see `openssl ecparam -list_curves` for a full list), but for brevity this
 implementation restricts to the three mentioned above.
 
+> *PLEASE NOTE:* The `P-256K` curve name (`crv` parameter) used when serializing
+> a key using the `secp384k1` curve is not standard, and *NOT* interoperable
+> with other systems.
+>
+> See the [IANA](https://www.iana.org/assignments/jose/jose.xhtml#web-key-elliptic-curve)
+> registry for all known (and interoperable) curve names.
+>
+> The `P-256K` name used might change at _ANY_ time.
 
 
 Basic construction

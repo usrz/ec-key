@@ -32,17 +32,17 @@ const lengths = {
 /* JWK curve names */
 const jwkCurves = {
   prime256v1 : 'P-256',
-   secp256k1 : 'P-256K', //This curve isn't given a formal name in the standard, http://hdknr.github.io/docs/identity/jwa.html
+   secp256k1 : 'P-256K', /* NOT A STANDARD NAME: See the README.md file */
    secp384r1 : 'P-384',
    secp521r1 : 'P-521'
 };
 
 /* OpenSSL curve names */
 const curves = {
- 'P-256' : 'prime256v1',
- 'P-256K' : 'secp256k1', //See above.
- 'P-384' : 'secp384r1',
- 'P-521' : 'secp521r1'
+ 'P-256'  : 'prime256v1',
+ 'P-256K' : 'secp256k1', /* NOT A STANDARD NAME: See the README.md file */
+ 'P-384'  : 'secp384r1',
+ 'P-521'  : 'secp521r1'
 };
 
 /* ========================================================================== *
