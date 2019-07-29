@@ -1,7 +1,7 @@
 {
   "name": "ec-key",
   "description": "Wrapper around an Elliptic Curve private or public keys",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "src/ec-key.js",
 
   "author": "Pier Fumagalli <pier@relocately.com>",
