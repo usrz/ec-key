@@ -4,17 +4,17 @@
   "version": "0.0.3",
   "main": "src/ec-key.js",
 
-  "author": "Pier Fumagalli <pier@relocately.com>",
-  "homepage": "https://github.com/relocately/ec-key",
-  "bugs": "https://github.com/relocately/ec-key/issues",
+  "author": "Pier Fumagalli <pier@usrz.com>",
+  "homepage": "https://github.com/usrz/ec-key",
+  "bugs": "https://github.com/usrz/ec-key/issues",
   "license": "MIT",
 
   "contributors": [
-    "Pier Fumagalli <pier@relocately.com>"
+    "Pier Fumagalli <pier@usrz.com>"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/relocately/ec-key"
+    "url": "https://github.com/usrz/ec-key"
   },
   "scripts": {
     "test": "gulp test"
