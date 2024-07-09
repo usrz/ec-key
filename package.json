@@ -1,8 +1,9 @@
 {
   "name": "ec-key",
   "description": "Wrapper around an Elliptic Curve private or public keys",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "src/ec-key.js",
+  "types": "ec-key.d.ts",
   "author": "Pier Fumagalli <pier@usrz.com>",
   "homepage": "https://github.com/usrz/ec-key",
   "bugs": "https://github.com/usrz/ec-key/issues",
@@ -15,7 +16,7 @@
     "url": "https://github.com/usrz/ec-key"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "mocha"
   },
   "keywords": [
     "ec",
@@ -35,14 +36,18 @@
     "openssl"
   ],
   "devDependencies": {
-    "chai": "^4.2.0",
-    "gulp": "^4.0.2",
-    "gulp-mocha": "^6.0.0"
+    "chai": "<5",
+    "mocha": "^10.6.0"
   },
   "dependencies": {
-    "asn1.js": "^5.2.0"
+    "asn1.js": "^5.4.1"
   },
   "engines": {
-    "node": ">=6.0.0"
-  }
+    "node": ">=10.0.0"
+  },
+  "files": [
+    "src/ec-key.js",
+    "ec-key.d.ts",
+    "*.md"
+  ]
 }

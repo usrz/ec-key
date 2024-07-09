@@ -2,7 +2,10 @@
 
 const crypto = require('crypto');
 const asn = require('asn1.js');
-const util = require('util');
+
+function isString(value) {
+  return typeof value === 'string'
+}
 
 /* ========================================================================== *
  * From RFC-4492 (Appendix A) Equivalent Curves (Informative)                 *
@@ -168,19 +171,19 @@ const pemPkcs8RE   = /-+BEGIN PRIVATE KEY-+([\s\S]*)-+END PRIVATE KEY-+/m;
 const pemSpkiRE    = /-+BEGIN PUBLIC KEY-+([\s\S]*)-+END PUBLIC KEY-+/m;
 
 function parsePem(pem) {
-  if (! util.isString(pem)) throw new TypeError("PEM must be a string");
+  if (! isString(pem)) throw new TypeError("PEM must be a string");
 
   var match = null;
   if (match = pem.match(pemRfc5915RE)) {
-    var buffer = new Buffer(match[1].replace(/[\s-]/mg, ''), 'base64');
+    var buffer = Buffer.from(match[1].replace(/[\s-]/mg, ''), 'base64');
     return parseRfc5915(buffer);
 
   } else if (match = pem.match(pemPkcs8RE)) {
-    var buffer = new Buffer(match[1].replace(/[\s-]/mg, ''), 'base64');
+    var buffer = Buffer.from(match[1].replace(/[\s-]/mg, ''), 'base64');
     return parsePkcs8(buffer);
 
   } else if (match = pem.match(pemSpkiRE)) {
-    var buffer = new Buffer(match[1].replace(/[\s-]/mg, ''), 'base64');
+    var buffer = Buffer.from(match[1].replace(/[\s-]/mg, ''), 'base64');
     return parseSpki(buffer);
 
   } else {
@@ -201,7 +204,7 @@ function ECKey(key, format) {
   if (! format) format = 'pem';
 
   // BUFFER KEYS: either in "pkcs8" or "spki" format (base64) or "pem" (ascii)
-  if (util.isBuffer(key)) {
+  if (Buffer.isBuffer(key)) {
 
     if (format == 'pem') {
       var k = parsePem(key.toString('ascii'));
@@ -231,7 +234,7 @@ function ECKey(key, format) {
   }
 
   // STRING KEYS: base64 all the time, but also allowed in PEM
-  else if (util.isString(key)) {
+  else if (isString(key)) {
 
     if (format == 'pem') {
       var k = parsePem(key);
@@ -241,7 +244,7 @@ function ECKey(key, format) {
       d = k.d;
 
     } else if ((format == "pkcs8") || (format == "rfc5208")) {
-      var k = parsePkcs8(new Buffer(key, 'base64'));
+      var k = parsePkcs8(Buffer.from(key, 'base64'));
       curve = k.c;
       x = k.x;
       y = k.y;
@@ -249,7 +252,7 @@ function ECKey(key, format) {
 
 
     } else if ((format == "spki") || (format == "rfc5280")) {
-      var k = parseSpki(new Buffer(key, 'base64'));
+      var k = parseSpki(Buffer.from(key, 'base64'));
       curve = k.c;
       x = k.x;
       y = k.y;
@@ -262,49 +265,49 @@ function ECKey(key, format) {
 
   // OBJECT KEY: needs to contain "(curve|crv)", "(d|privateKey)" if it's a
   // private key and "(publicKey|x,y)" always required (both for priv and pub)
-  else if (util.isObject(key)) {
+  else if (key && (typeof key === 'object')) {
 
    // Curves
-    if (util.isString(key.curve)) {
+    if (isString(key.curve)) {
       curve = key.curve;
-    } else if (util.isString(key.crv)) {
+    } else if (isString(key.crv)) {
       curve = curves[key.crv] || key.crv;
     }
 
     // Private key or "d"
-    if (util.isBuffer(key.privateKey)) {
+    if (Buffer.isBuffer(key.privateKey)) {
       d = key.privateKey;
-    } else if (util.isString(key.privateKey)) {
-      d = new Buffer(key.privateKey, 'base64');
-    } else if (util.isBuffer(key.d)) {
+    } else if (isString(key.privateKey)) {
+      d = Buffer.from(key.privateKey, 'base64');
+    } else if (Buffer.isBuffer(key.d)) {
       d = key.d;
-    } else if (util.isString(key.d)) {
-      d = new Buffer(key.d, 'base64');
+    } else if (isString(key.d)) {
+      d = Buffer.from(key.d, 'base64');
     }
 
     // Public key, or x and y
-    if (util.isBuffer(key.publicKey)) {
+    if (Buffer.isBuffer(key.publicKey)) {
       var k = parsePublicKeyBuffer(curve, key.publicKey);
       x = k.x;
       y = k.y;
 
-    } else if (util.isString(key.publicKey)) {
-      var k = parsePublicKeyBuffer(curve, new Buffer(key.publicKey, 'base64'));
+    } else if (isString(key.publicKey)) {
+      var k = parsePublicKeyBuffer(curve, Buffer.from(key.publicKey, 'base64'));
       x = k.x;
       y = k.y;
 
     } else {
       // Need to get x and y
-      if (util.isBuffer(key.x)) {
+      if (Buffer.isBuffer(key.x)) {
         x = key.x;
-      } else if (util.isString(key.x)) {
-        x = new Buffer(key.x, 'base64');
+      } else if (isString(key.x)) {
+        x = Buffer.from(key.x, 'base64');
       }
 
-      if (util.isBuffer(key.y)) {
+      if (Buffer.isBuffer(key.y)) {
         y = key.y;
-      } else if (util.isString(key.y)) {
-        y = new Buffer(key.y, 'base64');
+      } else if (isString(key.y)) {
+        y = Buffer.from(key.y, 'base64');
       }
     }
 
@@ -338,14 +341,14 @@ function ECKey(key, format) {
       enumerable: true,
       configurable: false,
       get: function() {
-        return new Buffer(x)
+        return Buffer.from(x)
       }
     },
     'y': {
       enumerable: true,
       configurable: false,
       get: function() {
-        return new Buffer(y)
+        return Buffer.from(y)
       }
     },
 
@@ -359,7 +362,7 @@ function ECKey(key, format) {
       enumerable: false,
       configurable: false,
       get: function() {
-        return Buffer.concat([new Buffer([0x04]), x, y]);
+        return Buffer.concat([Buffer.from([0x04]), x, y]);
       }
     }
   });
@@ -369,7 +372,7 @@ function ECKey(key, format) {
     enumerable: true,
     configurable: false,
     get: function() {
-      return new Buffer(d)
+      return Buffer.from(d)
     }
   });
 }
@@ -456,7 +459,7 @@ ECKey.prototype.toBuffer = function toBuffer(format) {
   if (! format) format = 'pem';
 
   // Simple PEM conversion, wrapping the string in the buffer
-  if (format == 'pem') return new Buffer(this.toString('pem'), 'ascii');
+  if (format == 'pem') return Buffer.from(this.toString('pem'), 'ascii');
 
   if (this.isPrivateECKey) {
     // Strip leading zeroes from private key
@@ -571,7 +574,7 @@ ECKey.prototype.toJSON = function toJSON() {
     var bytes = lengths[this.curve];
     if (d.length < bytes) {
       var remaining = bytes - d.length;
-      d = Buffer.concat([new Buffer(remaining).fill(0), d]);
+      d = Buffer.concat([Buffer.alloc(remaining).fill(0), d]);
     }
     jwk.d = urlsafe(d);
   }
@@ -585,4 +588,3 @@ ECKey.prototype.toJSON = function toJSON() {
  * ========================================================================== */
 
 exports = module.exports = ECKey;
-
