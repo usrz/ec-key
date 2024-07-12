@@ -36,7 +36,7 @@ interface ECKeyOptions {
   y?: string | Buffer,
 }
 
-class ECKey {
+declare class ECKey {
   /** Create a new `ECKey` instance parsing the specified key in the default `PEM` format */
   constructor(key: string | Buffer)
   /** Create a new `ECKey` instance parsing the specified key using the specified format */
